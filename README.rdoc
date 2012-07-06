@@ -1,6 +1,63 @@
 = denormalizer
 
-Description goes here.
+Run and cache methods so they can be used later.  Create chainable scopes using the cached outputs of the methods.
+
+== Installation
+
+Add to your Gemfile
+
+    gem "denormalizer"
+
+Run the installer
+
+    rails generate denormalizer:install
+    rake db:migrate
+
+Denormalize a method in a model.  This will run the method and save the result every time the model is updated.
+
+    class Widget < ActiveRecord::Base
+      def active?
+        do_something_complex
+      end
+      denormalize :active?
+    end
+
+Denormalize associations.  This will run the denormalization method on each of the objects in the association.
+
+    class Item < ActiveRecord::Base
+      has_many :widgets
+      also_denormalize :widgets
+    end
+
+Use the denormalized data
+
+    Book.denormalized_active
+    Book.denormalized_not_active
+        
+    Book.first.denormalized_active? (coming soon)
+
+== Thought Process
+
+I am trying to avoid duplicating complex code in instance methods and scopes.  Given this method,
+
+    def active?
+      received_at >= Time.now && items.expired.empty?
+    end
+
+You have two choices to get all active records,
+
+    def self.active
+      all.select(&:active?)
+    end
+
+    scope :active, lambda { where(["widgets.received_at >= ?", Time.now]).where("(select count(*) from items where items.widget_id=widgets.id and (expired_at is null or expired_at >= ?)) = 0", Time.now]) }
+
+The first minimizes code duplication but is not chainable and often slower than the pure sql version.  The second solution is fast and chainable but requires two updates every time the active? criteria needs to be updated.  Additionally, it requires an updated whenever the Item model's expired scope is updated.
+
+== Todo
+
+* Improve test coverage
+* Add methods to directly access denormalized data from model instances
 
 == Contributing to denormalizer
  

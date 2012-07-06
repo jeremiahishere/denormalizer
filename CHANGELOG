@@ -1,0 +1,6 @@
+== unreleased changes
+
+== 0.0.1
+
+* Added mixin with denormalize_all, denormalize, and also_denormalize methods
+* Added generator to create the migration and config

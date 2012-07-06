@@ -17,8 +17,8 @@ Jeweler::Tasks.new do |gem|
   gem.name = "denormalizer"
   gem.homepage = "http://github.com/jeremiahishere/denormalizer"
   gem.license = "MIT"
-  gem.summary = %Q{TODO: one-line summary of your gem}
-  gem.description = %Q{TODO: longer description of your gem}
+  gem.summary = %Q{Cache method outputs}
+  gem.description = %Q{Cache method outputs and automatically create chainable scopes based on their outputs}
   gem.email = "jeremiah@cloudspace.com"
   gem.authors = ["Jeremiah Hemphill"]
   # dependencies defined in Gemfile
