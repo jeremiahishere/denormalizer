@@ -31,10 +31,10 @@ Denormalize associations.  This will run the denormalization method on each of t
 
 Use the denormalized data
 
-    Book.denormalized_active
-    Book.denormalized_not_active
+    Book.denormalized_actives
+    Book.denormalized_not_actives
         
-    Book.first.denormalized_active? (coming soon)
+    Book.first.denormalized_active?
 
 == Thought Process
 
@@ -56,8 +56,10 @@ The first minimizes code duplication but is not chainable and often slower than 
 
 == Todo
 
-* Improve test coverage
-* Add methods to directly access denormalized data from model instances
+* Add code to make sure association denormalization does loop infinitely
+* Improve testing on the Denormalizer::MethodOutput model
+* Refactor dome of the denormalize mixin code to the MethodOutput model
+* Figure out how to replace mysql with a different database/memory store system
 
 == Contributing to denormalizer
  

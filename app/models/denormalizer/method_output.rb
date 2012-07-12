@@ -6,4 +6,13 @@ class Denormalizer::MethodOutput < ActiveRecord::Base
 
   FalseOutput = 0
   TrueOutput = 1
+
+  def self.by_object_and_method_name(obj, method_name)
+    attributes = {
+      :denormalized_object_type => obj.class.name, 
+      :denormalized_object_id => obj.id, 
+      :denormalized_object_method => method_name
+    }
+    where(attributes).limit(1)
+  end
 end

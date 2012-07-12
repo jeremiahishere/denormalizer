@@ -35,7 +35,7 @@ module Denormalizer
             "denormalizer_method_outputs.denormalized_object_method" => method_name.to_s,
             "denormalizer_method_outputs.method_output" => Denormalizer::MethodOutput::TrueOutput
           }
-          true_scope_name = "denormalized_#{method_name.to_s.gsub('?', '')}".to_sym
+          true_scope_name = "denormalized_#{method_name.to_s.gsub('?', '')}".pluralize.to_sym
           scope true_scope_name, lambda { joins(:denormalized_method_outputs).where(true_attributes)}
 
           # setup false scope
@@ -43,8 +43,14 @@ module Denormalizer
             "denormalizer_method_outputs.denormalized_object_method" => method_name.to_s,
             "denormalizer_method_outputs.method_output" => Denormalizer::MethodOutput::FalseOutput
           }
-          false_scope_name = "denormalized_not_#{method_name.to_s.gsub('?', '')}".to_sym
+          false_scope_name = "denormalized_not_#{method_name.to_s.gsub('?', '')}".pluralize.to_sym
           scope false_scope_name, lambda { joins(:denormalized_method_outputs).where(false_attributes)}
+
+          instance_method_name = "denormalized_#{method_name.to_s}"
+          define_method instance_method_name do
+            saved_output = Denormalizer::MethodOutput.by_object_and_method_name(self, method_name).first
+            return saved_output.method_output == Denormalizer::MethodOutput::TrueOutput
+          end
         end
 
         after_save :method_denormalization
@@ -76,14 +82,16 @@ module Denormalizer
             method_output = self.send(method_name) ? Denormalizer::MethodOutput::TrueOutput : Denormalizer::MethodOutput::FalseOutput
 
             # find a match then create or update based on success
-            attributes = {
-              :denormalized_object_type => self.class.name, 
-              :denormalized_object_id => self.id, 
-              :denormalized_object_method => method_name
-            }
-            saved_output = Denormalizer::MethodOutput.where(attributes).limit(1).first
+            # TODO: refactor this entire section to metho on Denormalizer::MethodOutput (JH 7-13-2012)
+            saved_output = Denormalizer::MethodOutput.by_object_and_method_name(self, method_name).first
             if saved_output.nil?
-              Denormalizer::MethodOutput.create(attributes.merge({ :method_output => method_output }))
+              attributes = {
+                :denormalized_object_type => self.class.name,
+                :denormalized_object_id => self.id,
+                :denormalized_object_method => method_name,
+                :method_output => method_output
+              }
+              Denormalizer::MethodOutput.create(attributes)
             else
               saved_output.method_output = method_output
               saved_output.save
@@ -93,6 +101,8 @@ module Denormalizer
       end
 
       def association_denormalization
+        # TODO: make sure this doesn't loop infinitely (JH 7-13-2012)
+        # if two models have a circular association or a model has a self association, this will not work
         self.denormalized_associations.each do |assoc_method|
           assoc = self.send(assoc_method)
           if assoc.is_a?(Array)

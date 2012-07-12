@@ -1,5 +1,11 @@
 == unreleased changes
 
+== 0.0.2
+
+* Added basic testing for the mixins
+* Changed the scope names to plurals
+* Added instance methods to check for individual denormalized method outputs
+
 == 0.0.1
 
 * Added mixin with denormalize_all, denormalize, and also_denormalize methods
