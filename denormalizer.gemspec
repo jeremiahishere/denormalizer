@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = "denormalizer"
-  s.version = "0.0.1"
+  s.version = "0.0.2"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Jeremiah Hemphill"]
-  s.date = "2012-07-06"
+  s.date = "2012-07-13"
   s.description = "Cache method outputs and automatically create chainable scopes based on their outputs"
   s.email = "jeremiah@cloudspace.com"
   s.extra_rdoc_files = [
@@ -27,6 +27,7 @@ Gem::Specification.new do |s|
     "Rakefile",
     "VERSION",
     "app/models/denormalizer/method_output.rb",
+    "denormalizer.gemspec",
     "lib/denormalizer.rb",
     "lib/denormalizer/config.rb",
     "lib/denormalizer/denormalize.rb",
@@ -35,6 +36,8 @@ Gem::Specification.new do |s|
     "lib/generators/denormalizer/install_generator.rb",
     "lib/generators/denormalizer/templates/config.rb",
     "lib/generators/denormalizer/templates/migrations/install_migration.rb.erb",
+    "spec/association_denormalization_spec.rb",
+    "spec/denormalize_all_spec.rb",
     "spec/denormalizer_spec.rb",
     "spec/dummy/Rakefile",
     "spec/dummy/app/controllers/application_controller.rb",
@@ -74,6 +77,7 @@ Gem::Specification.new do |s|
     "spec/dummy/public/stylesheets/.gitkeep",
     "spec/dummy/script/rails",
     "spec/integration/navigation_spec.rb",
+    "spec/method_denormalization_spec.rb",
     "spec/spec_helper.rb"
   ]
   s.homepage = "http://github.com/jeremiahishere/denormalizer"
