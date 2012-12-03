@@ -1,5 +1,10 @@
 == unreleased changes
 
+== 0.0.3
+
+* Updated the generated scopes so that they are chainable with each other.  Rails
+has issues when you try to join to the same table twice.
+
 == 0.0.2
 
 * Added basic testing for the mixins

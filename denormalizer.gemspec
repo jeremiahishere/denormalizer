@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = "denormalizer"
-  s.version = "0.0.2"
+  s.version = "0.0.3"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Jeremiah Hemphill"]
-  s.date = "2012-07-13"
+  s.date = "2012-12-03"
   s.description = "Cache method outputs and automatically create chainable scopes based on their outputs"
   s.email = "jeremiah@cloudspace.com"
   s.extra_rdoc_files = [

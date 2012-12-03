@@ -29,22 +29,27 @@ module Denormalizer
         # create scopes
         # note that at some point, we probably need to identify these as denormalized scopes (JH 7-5-2012)
         # dn_method_name maybe
+        #
+        # Table aliases have been added so that denormalized scopes can be chained (JH 12-3-2012)
+        # Note that you can chain a method with it's false version
         args.each do |method_name|
+          table_alias = "dnmos_#{table_name}_#{self.denormalized_methods.size - 1}"
           # setup true scope
           true_attributes = { 
-            "denormalizer_method_outputs.denormalized_object_method" => method_name.to_s,
-            "denormalizer_method_outputs.method_output" => Denormalizer::MethodOutput::TrueOutput
+            "#{table_alias}.denormalized_object_method" => method_name.to_s,
+            "#{table_alias}.method_output" => Denormalizer::MethodOutput::TrueOutput
           }
           true_scope_name = "denormalized_#{method_name.to_s.gsub('?', '')}".pluralize.to_sym
-          scope true_scope_name, lambda { joins(:denormalized_method_outputs).where(true_attributes)}
+          scope true_scope_name, lambda { joins("INNER JOIN denormalizer_method_outputs AS #{table_alias} on #{table_alias}.denormalized_object_type='#{to_s}' AND #{table_alias}.denormalized_object_id=#{table_name}.id").where(true_attributes)}
 
           # setup false scope
+          # the false query uses the same table alias
           false_attributes = {
-            "denormalizer_method_outputs.denormalized_object_method" => method_name.to_s,
-            "denormalizer_method_outputs.method_output" => Denormalizer::MethodOutput::FalseOutput
+            "#{table_alias}.denormalized_object_method" => method_name.to_s,
+            "#{table_alias}.method_output" => Denormalizer::MethodOutput::FalseOutput
           }
           false_scope_name = "denormalized_not_#{method_name.to_s.gsub('?', '')}".pluralize.to_sym
-          scope false_scope_name, lambda { joins(:denormalized_method_outputs).where(false_attributes)}
+          scope false_scope_name, lambda { joins("INNER JOIN denormalizer_method_outputs AS #{table_alias} on #{table_alias}.denormalized_object_type='#{to_s}' AND #{table_alias}.denormalized_object_id=#{table_name}.id").where(false_attributes)}
 
           instance_method_name = "denormalized_#{method_name.to_s}"
           define_method instance_method_name do

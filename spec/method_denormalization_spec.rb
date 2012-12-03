@@ -32,16 +32,16 @@ describe "method denormalization" do
     describe "denormalized_short_names" do
       it "should match this sql" do
         sql = Book.denormalized_short_names.to_sql 
-        sql.should match "INNER JOIN \"denormalizer_method_outputs\" ON \"denormalizer_method_outputs\".\"denormalized_object_id\" = \"books\".\"id\" AND \"denormalizer_method_outputs\".\"denormalized_object_type\" = 'Book'"
-        sql.should match "WHERE \"denormalizer_method_outputs\".\"denormalized_object_method\" = 'short_name.' AND \"denormalizer_method_outputs\".\"method_output\" = 1"
+        sql.should match "INNER JOIN denormalizer_method_outputs AS dnmos_books_0 on dnmos_books_0.denormalized_object_type='Book' AND dnmos_books_0.denormalized_object_id=books.id"
+        sql.should match "WHERE \"dnmos_books_0\".\"denormalized_object_method\" = 'short_name.' AND \"dnmos_books_0\".\"method_output\" = 1"
       end
     end
 
     describe "denormalized_not_short_names" do
       it "should match this sql" do
         sql = Book.denormalized_not_short_names.to_sql 
-        sql.should match "INNER JOIN \"denormalizer_method_outputs\" ON \"denormalizer_method_outputs\".\"denormalized_object_id\" = \"books\".\"id\" AND \"denormalizer_method_outputs\".\"denormalized_object_type\" = 'Book'"
-        sql.should match "WHERE \"denormalizer_method_outputs\".\"denormalized_object_method\" = 'short_name.' AND \"denormalizer_method_outputs\".\"method_output\" = 0"
+        sql.should match "INNER JOIN denormalizer_method_outputs AS dnmos_books_0 on dnmos_books_0.denormalized_object_type='Book' AND dnmos_books_0.denormalized_object_id=books.id"
+        sql.should match "WHERE \"dnmos_books_0\".\"denormalized_object_method\" = 'short_name.' AND \"dnmos_books_0\".\"method_output\" = 0"
       end
     end
   end
