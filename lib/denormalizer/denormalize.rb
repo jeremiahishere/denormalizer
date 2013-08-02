@@ -14,10 +14,12 @@ module Denormalizer
         end
       end
 
-      def denormalize(args)
+      def denormalize(args, options = {} )
         # setup list of denormalized methods 
         mattr_accessor :denormalized_methods unless respond_to? :denormalized_methods
         self.denormalized_methods = [] unless self.denormalized_methods.is_a?(Array)
+
+        mattr_accessor :denormalization_class unless respond_to? :denormalization_class
 
         # add association
         has_many :denormalized_method_outputs, :class_name => 'Denormalizer::MethodOutput', :as => :denormalized_object, :dependent => :destroy
@@ -26,6 +28,9 @@ module Denormalizer
         args = [args] unless args.is_a?(Array)
         self.denormalized_methods |= args
 
+        # setting class name if one is passed in, otherwise use class of model with mixin (AU 8-1-13)
+        self.denormalization_class = options.has_key?(:class_name) ? options[:class_name] : self.to_s
+
         # create scopes
         # note that at some point, we probably need to identify these as denormalized scopes (JH 7-5-2012)
         # dn_method_name maybe
@@ -33,6 +38,7 @@ module Denormalizer
         # Table aliases have been added so that denormalized scopes can be chained (JH 12-3-2012)
         # Note that you can chain a method with it's false version
         args.each do |method_name|
+          # table_name is called on the model of the mixin
           table_alias = "dnmos_#{table_name}_#{self.denormalized_methods.size - 1}"
           # setup true scope
           true_attributes = { 
@@ -40,7 +46,7 @@ module Denormalizer
             "#{table_alias}.method_output" => Denormalizer::MethodOutput::TrueOutput
           }
           true_scope_name = "denormalized_#{method_name.to_s.gsub('?', '')}".pluralize.to_sym
-          scope true_scope_name, lambda { joins("INNER JOIN denormalizer_method_outputs AS #{table_alias} on #{table_alias}.denormalized_object_type='#{to_s}' AND #{table_alias}.denormalized_object_id=#{table_name}.id").where(true_attributes)}
+          scope true_scope_name, lambda { joins("INNER JOIN denormalizer_method_outputs AS #{table_alias} on #{table_alias}.denormalized_object_type='#{denormalization_class}' AND #{table_alias}.denormalized_object_id=#{table_name}.id").where(true_attributes)}
 
           # setup false scope
           # the false query uses the same table alias
@@ -53,7 +59,7 @@ module Denormalizer
 
           instance_method_name = "denormalized_#{method_name.to_s}"
           define_method instance_method_name do
-            saved_output = Denormalizer::MethodOutput.by_object_and_method_name(self, method_name).first
+            saved_output = Denormalizer::MethodOutput.by_object_and_method_name(self, method_name, self.denormalization_class).first
             return saved_output.method_output == Denormalizer::MethodOutput::TrueOutput
           end
         end
@@ -88,10 +94,10 @@ module Denormalizer
 
             # find a match then create or update based on success
             # TODO: refactor this entire section to metho on Denormalizer::MethodOutput (JH 7-13-2012)
-            saved_output = Denormalizer::MethodOutput.by_object_and_method_name(self, method_name).first
+            saved_output = Denormalizer::MethodOutput.by_object_and_method_name(self, method_name, self.denormalization_class).first
             if saved_output.nil?
               attributes = {
-                :denormalized_object_type => self.class.name,
+                :denormalized_object_type => self.denormalization_class,
                 :denormalized_object_id => self.id,
                 :denormalized_object_method => method_name,
                 :method_output => method_output
