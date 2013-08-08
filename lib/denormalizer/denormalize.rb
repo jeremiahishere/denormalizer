@@ -37,9 +37,9 @@ module Denormalizer
         #
         # Table aliases have been added so that denormalized scopes can be chained (JH 12-3-2012)
         # Note that you can chain a method with it's false version
-        args.each do |method_name|
+        args.each_with_index do |method_name, i|
           # table_name is called on the model of the mixin
-          table_alias = "dnmos_#{table_name}_#{self.denormalized_methods.size - 1}"
+          table_alias = "dnmos_#{table_name}_#{i}"
           # setup true scope
           true_attributes = { 
             "#{table_alias}.denormalized_object_method" => method_name.to_s,
@@ -55,7 +55,7 @@ module Denormalizer
             "#{table_alias}.method_output" => Denormalizer::MethodOutput::FalseOutput
           }
           false_scope_name = "denormalized_not_#{method_name.to_s.gsub('?', '')}".pluralize.to_sym
-          scope false_scope_name, lambda { joins("INNER JOIN denormalizer_method_outputs AS #{table_alias} on #{table_alias}.denormalized_object_type='#{to_s}' AND #{table_alias}.denormalized_object_id=#{table_name}.id").where(false_attributes)}
+          scope false_scope_name, lambda { joins("INNER JOIN denormalizer_method_outputs AS #{table_alias} on #{table_alias}.denormalized_object_type='#{denormalization_class}' AND #{table_alias}.denormalized_object_id=#{table_name}.id").where(false_attributes)}
 
           instance_method_name = "denormalized_#{method_name.to_s}"
           define_method instance_method_name do

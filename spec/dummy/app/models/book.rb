@@ -6,7 +6,7 @@ class Book < ActiveRecord::Base
   def short_name?
     name.length < 5
   end
-  denormalize [:short_name?, :printed?], :class_name => "different 'class' name"
+  denormalize [:short_name?, :printed?], :class_name => "different class name"
 
   def printed?
     !printings.empty?
